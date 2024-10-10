@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - ${ENV_FILE:-.env}
+    ports:
+      - 3000:3000
+    links:
+      - db
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      placement:
+        max_replicas_per_node: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      # restart_policy:
+      #   condition: any
+      #   delay: 5s
+      #   max_attempts: 3
+      #   window: 120s
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 50M
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: blockchain_price_tracker
